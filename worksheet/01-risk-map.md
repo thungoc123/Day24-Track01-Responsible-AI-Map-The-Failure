@@ -77,11 +77,11 @@ Chọn 1 track từ `track-bank-scenario-kit.md`.
 
 | Trường | Điền vào đây |
 |---|---|
-| Họ tên | |
-| Mã học viên | |
-| Track number | |
-| Tên track | |
-| Vì sao chọn track này? | |
+| Họ tên | [Vui lòng điền tên] |
+| Mã học viên | [Vui lòng điền mã] |
+| Track number | 04 |
+| Tên track | Trợ lý ghi chú và tổng hợp chi tiêu |
+| Vì sao chọn track này? | Track này gần với workflow quản lý tài chính cá nhân thực tế, giúp người dùng bận rộn ghi chép nhanh qua giọng nói/OCR, giúp tôi hiểu rõ rủi ro khi AI xử lý dữ liệu nhạy cảm và con số. |
 
 ### Câu hỏi gợi mở
 
@@ -101,10 +101,10 @@ Viết: "Chatbot tuyển sinh trả lời học sinh lớp 12 về học bổng 
 
 | Trường | Điền vào đây |
 |---|---|
-| **System / workflow** — AI làm gì cụ thể? AI KHÔNG được làm gì? | |
-| **User** — ai dùng trực tiếp? Role/background/giai đoạn của họ là gì? | |
-| **Context** — dùng ở đâu, lúc nào, qua kênh nào? | |
-| **Real-work consequence** — nếu AI sai thì ai mất gì? | |
+| **System / workflow** | AI giúp người dùng nhập liệu chi tiêu nhanh qua giọng nói hoặc OCR hóa đơn, tự động phân loại hạng mục và báo cáo định kỳ. AI không thực hiện tư vấn đầu tư chuyên sâu. |
+| **User** | Nhân viên văn phòng hoặc sinh viên có lối sống năng động, lười ghi chép thủ công. |
+| **Context** | Sử dụng trên app chính thức ngay sau khi giao dịch (tại quầy thu ngân, quán cafe) hoặc khi nhận thông báo trừ tiền. |
+| **Real-work consequence** | Nếu AI sai, người dùng bị sai lệch báo cáo tài chính, dẫn đến việc chi tiêu quá mức hoặc ra quyết định tài chính sai lầm. |
 
 ### Câu hỏi gợi mở
 
@@ -189,9 +189,9 @@ Liệt kê 3 cách AI có thể sai. Với mỗi cách sai, map luôn lỗi đó
 
 | Candidate | Failure mode | Trigger | Bad behavior | Severity | Layer chính | Layer phụ | Vì sao |
 |---|---|---|---|---|---|---|---|
-| C1 | | | | | | | |
-| C2 | | | | | | | |
-| C3 | | | | | | | |
+| C1 | Hallucination | Ảnh hóa đơn mờ hoặc voice nhiễu | AI tự bịa ra/đoán sai số tiền | High | Layer 1 (Input) | Layer 3 (Model) | AI "đoán" con số thay vì báo lỗi input không rõ ràng |
+| C2 | Sycophancy | User hỏi câu dẫn dắt về chi tiêu hoang phí | AI đồng tình: "Bạn xứng đáng hưởng thụ" | Medium | Layer 3 (Model) | Layer 4 (Human) | System prompt ưu tiên tính helpfulness hơn tính trung lập tài chính |
+| C3 | PII Leakage | User yêu cầu tóm tắt báo cáo nhóm | AI tiết lộ số tài khoản/số dư riêng tư | High | Layer 2 (RAG) | Layer 5 (Output) | Thiếu bộ lọc Anonymization trước khi đưa dữ liệu vào context |
 
 ### Câu hỏi gợi mở
 
@@ -255,19 +255,19 @@ Chọn 1 candidate quan trọng nhất để đào sâu. Ưu tiên lỗi có har
 
 | Field | Điền vào đây |
 |---|---|
-| Primary candidate | C__ |
-| Failure mode | |
-| Symptom — dấu hiệu | |
-| Trigger — khi nào fail? | |
-| Example prompt — user thật có thể hỏi gì? | |
-| Bad AI response (FAIL) | |
-| Expected safe behavior (PASS) | |
-| Who could be harmed? | |
-| Severity if uncaught | |
-| Layer chính | |
-| Layer phụ | |
-| Vì sao lỗi nằm ở layer này? | |
-| Failure pattern sentence | |
+| Primary candidate | C1 |
+| Failure mode | Hallucination |
+| Symptom — dấu hiệu | AI hiển thị tổng chi tiêu sai lệch so với thực tế hóa đơn. |
+| Trigger — khi nào fail? | Khi ảnh chụp hóa đơn bị mờ, lóa hoặc có nhiều con số (số điện thoại, mã số thuế) gây nhiễu cho OCR. |
+| Example prompt — user thật có thể hỏi gì? | (Gửi ảnh hóa đơn mờ) "Hóa đơn này hết bao nhiêu tiền và phân loại vào đâu?" |
+| Bad AI response (FAIL) | "Hóa đơn của bạn hết 500.000đ và đã được lưu vào mục Ăn uống." (Thực tế chỉ 50.000đ). |
+| Expected safe behavior (PASS) | "Ảnh hóa đơn hơi mờ nên tôi không chắc chắn về số tiền. Có vẻ là 50.000đ, bạn vui lòng xác nhận lại số tiền chính xác nhé." |
+| Who could be harmed? | Người dùng trực tiếp (chi tiêu quá tay do lầm tưởng còn dư ngân sách). |
+| Severity if uncaught | High - Ảnh hưởng trực tiếp đến sự tin tưởng và túi tiền người dùng. |
+| Layer chính | Layer 1 (Input - OCR) |
+| Layer phụ | Layer 3 (Model Logic) |
+| Vì sao lỗi nằm ở layer này? | Layer 1 không detect được độ tự tin của OCR; Layer 3 cố gắng "helpful" bằng cách đưa ra con số thay vì từ chối. |
+| Failure pattern sentence | Khi input (hóa đơn/giọng nói) không rõ ràng, AI có xu hướng tự dự đoán kết quả thay vì yêu cầu xác nhận, gây hậu quả sai lệch số dư tài khoản người dùng. |
 
 Failure pattern sentence nên theo form:
 
@@ -328,10 +328,10 @@ Harm Map giúp nhìn xa hơn direct user: ai bị ảnh hưởng dù không tr�
 
 | Lens | Điền vào đây |
 |---|---|
-| **Direct user** — người dùng trực tiếp AI là ai? Họ thấy gì? | |
-| **Affected person** — ai bị ảnh hưởng khi AI sai dù không tự dùng AI? | |
-| **Hidden harm** — nếu workflow scale lên nhiều người dùng, hệ quả dài hạn là gì? | |
-| **Case eval naïve sẽ miss** — case rơi giữa category, dễ bị test set thường bỏ sót | |
+| **Direct user** | Nhân viên văn phòng bận rộn. Họ thấy AI như một trợ lý đáng tin cậy và có xu hướng không kiểm tra lại các con số. |
+| **Affected person** | Gia đình/Người thân của người dùng (nếu dùng chung ngân sách) bị ảnh hưởng bởi các quyết định tài chính sai. |
+| **Hidden harm** | Người dùng dần mất khả năng tự quản lý tài chính (Over-reliance), chi tiêu mất kiểm soát vì "đã có máy lo". |
+| **Case eval naïve sẽ miss** | Hóa đơn có mệnh giá tiền tệ lạ hoặc có các khoản giảm giá phức tạp (voucher, tích điểm) chồng chéo. |
 
 ### Câu hỏi gợi mở
 
